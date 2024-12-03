@@ -1,0 +1,36 @@
+{% extends "dieselConsumed/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <h2>{{ request.user.email }}</h2>
+
+    {% comment %} add tenant {% endcomment %}
+    
+    <h3>Add Tenant</h3>
+    <form action="{% url 'addTenant' %}" method="post">
+        {% csrf_token %}
+        <label>Tenant</label>
+        <input type="text" name="tenant" />
+        <label>Unit</label>
+        <input type="text" name="unit" />
+        <input type="submit" value="Add Tenant" />
+    </form>
+
+    {% for tenant in tenants %}
+        <h3> 
+            <a href="{% url 'displayTenant' tenant.id %}">{{ tenant }} </a>
+        </h3>
+    {% endfor %}
+    
+    
+    
+    
+
+    
+{% endblock %}
+
+{% block script %}
+    {% comment %} <script src="{% static 'mail/inbox.js' %}"></script> {% endcomment %}
+{% endblock %}
+
+

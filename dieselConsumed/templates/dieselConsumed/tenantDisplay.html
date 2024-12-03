@@ -1,0 +1,84 @@
+{% extends "dieselConsumed/layout.html" %}
+{% load static %}
+
+{% block body %}
+  
+    {% comment %} Input the tenant data {% endcomment %}
+    <h3>Add Today's Consumption</h3>
+    <form action="{% url 'addTenantConsumption' tenant.id %}" method="post">
+        {% csrf_token %}
+        <label>Hours of Diesel Consumed</label>
+        <input type="text" name="dieselHrs" />
+        <label>Amount Per Hrs</label>
+        <input type="text" name="amount" />
+        <input type="submit" value="Add" />
+    </form>
+
+    {% comment %} Individual Tenant Breakdown Bill {% endcomment %}
+    <div class="row">
+        <div class="col-md-7">
+          <div>
+            <h4>Monthly Diesel Consumption</h4>
+            <h3>{{ tenant.name }}</h3>
+          </div>
+
+          <table id="table" class="table table-striped table-primary">
+            <tr class="bg-primary text-white">
+              <th>Date</th>
+              <th>Individual Hours Consumed</th>
+              <th>Price Per Hour</th>
+              <th>Amount</th>
+            </tr>
+            {% for bill in tenantBill %}
+                <tr>
+                    <td>{{ bill.date }} </td>
+                    <td>{{ bill.hours_used }} hrs</td>
+                    <td>{{ bill.price_per_hour }}</td>
+                    <td>{{ bill.calculate_amount  }}</td>
+                   <td>
+                        <a class="btn btn-danger" href="{% url 'delete' bill.id %}">X</a>
+                    </td>
+                </tr>
+            {% endfor %}
+
+            <tr>
+              <td id="total"><b>Total</b></td>
+              <td id="totalHours"><b></b></td>
+              <td id="price"><b></b></td>
+              <td id="totalAmount"><b></b></td>
+            </tr>
+          </table>
+        </div>
+    
+{% endblock %}
+
+{% block script %}
+    {% comment %} <script src="{% static 'mail/inbox.js' %}"></script> {% endcomment %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            alert("Hello Nath");
+            var table = document.getElementById("table");
+            var totalHours = 0,
+            totalAmount = 0; 
+
+            console.log(table)
+           for (var i = 1; i < table.rows.length - 1; i++) {
+                console.log(table.rows[i].cells[1].innerHTML);
+                totalHours += parseFloat(table.rows[i].cells[1].innerHTML);
+                totalHours = Math.round(totalHours);
+                totalAmount += parseFloat(table.rows[i].cells[3].innerHTML);
+                totalAmount = Math.round(totalAmount);
+            }
+        
+
+            document.getElementById("totalHours").innerHTML =
+                "<b>" + totalHours + "hrs </b>";
+
+            document.getElementById("totalAmount").innerHTML =
+                "<b>#" + totalAmount + "</b>";
+        });
+    </script>
+{% endblock %}
+
+
+
