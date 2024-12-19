@@ -4,26 +4,24 @@ from django.db import IntegrityError
 from django.contrib.auth import authenticate, login, logout
 from datetime import datetime
 
-from .models import User, Tenant, GeneratorUsage
+from .models import User, Tenant, DailyRecord, MonthlySummary
 # Create your views here.
 
-
-def tenant_monthly_usage(request, tenant_id, year, month):
+def tenant_dashboard(request, tenant_id):
     tenant = get_object_or_404(Tenant, id=tenant_id)
-    summary = GeneratorUsage.calculate_monthly_usage(tenant_id, year, month)
-
-    return render(request, 'dieselConsumed/tenant_summary.html', {
+    daily_records = tenant.daily_records.order_by('-date')
+    monthly_summaries = tenant.monthly_summaries.order_by('-year', '-month')
+    return render(request, 'tenant_dashboard.html', {
         'tenant': tenant,
-        'summary': summary
+        'daily_records': daily_records,
+        'monthly_summaries': monthly_summaries,
     })
 
-
 def index(request):
-
     # Authenticated users view their inbox
     if request.user.is_authenticated:
         tenants = Tenant.objects.all()
-        genUsed = GeneratorUsage.objects.all()
+        genUsed = DailyRecord.objects.all()
 
         return render(request, 'dieselConsumed/index.html', {
             'tenants': tenants,
@@ -36,18 +34,34 @@ def index(request):
 
 
 # Display Listing Based on Cetegory
-def displayTenant(request, id):
+def displayTenant(request, id, year=None, month=None):
     tenant = Tenant.objects.get(id=id)
-    tenantGeneratorUsage = GeneratorUsage.objects.filter(tenant=tenant)
+    
+    # Default to the current year and month if not provided
+    today = datetime.today()
+    year = int(year) if year else today.year
+    month = int(month) if month else today.month
+
+    # Filter daily records for the specified month and year
+    daily_records = tenant.daily_records.filter(date__year=year, date__month=month)
+    
+    # Get monthly summary if available
+    monthly_summary = MonthlySummary.objects.filter(tenant=tenant, year=year, month=month).first()
+
+   
+    tenantGeneratorUsage = DailyRecord.objects.filter(tenant=tenant)
     current_date = datetime.now()
 
     return render(request, "dieselConsumed/tenantDisplay.html", {
         "tenantBill": tenantGeneratorUsage,
         'tenant': tenant,
-        'year': current_date.year,
-        'month': current_date.month,
+        'daily_records': daily_records,
+        'monthly_summary': monthly_summary,
+        'year': year,
+        'month': month,
     })
     
+
 # Add Tenant
 def addTenant(request):
     tenants = Tenant.objects.all()
@@ -72,16 +86,18 @@ def addTenantConsumption(request, id):
         amount = request.POST["amount"]
 
         
-        consume = GeneratorUsage(tenant=tenants, hours_used=dieselHrs, price_per_hour=amount)
+        consume = DailyRecord(tenant=tenants, hours_used=dieselHrs, price_per_hour=amount)
         consume.save()
         return HttpResponseRedirect(reverse("displayTenant", args=(id,)))
           
+
 # Delete Tenant Cosumption
 def delete_consume(request, id):
-    consumed = GeneratorUsage.objects.get(id=id)
+    consumed = DailyRecord.objects.get(id=id)
     consumed.delete()
     return HttpResponseRedirect(reverse("displayTenant", args=(id,)))
     # return render(request,'myapp/delete.html')
+
 
 def login_view(request):
     if request.method == "POST":

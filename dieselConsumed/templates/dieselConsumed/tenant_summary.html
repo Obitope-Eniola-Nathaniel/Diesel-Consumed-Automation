@@ -1,14 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Monthly Usage Summary</title>
+    <meta charset="UTF-8">
+    <title>Tenant Dashboard</title>
 </head>
 <body>
-    <h1>Monthly Usage Summary for {{ tenant.name }}</h1>
-    <p>Unit: {{ tenant.unit }}</p>
-    <p>Year: {{ summary.year }}</p>
-    <p>Month: {{ summary.month }}</p>
-    <p>Total Hours: {{ summary.total_hours }}</p>
-    <p>Total Amount: {{ summary.total_amount }}</p>
+    <h1>{{ tenant.name }} Dashboard</h1>
+
+    <h2>Daily Records</h2>
+    <table border="1">
+        <tr>
+            <th>Date</th>
+            <th>Hours Used</th>
+            <th>Price Per Hour</th>
+            <th>Daily Amount</th>
+        </tr>
+        {% for record in daily_records %}
+        <tr>
+            <td>{{ record.date }}</td>
+            <td>{{ record.hours_used }}</td>
+            <td>${{ record.price_per_hour }}</td>
+            <td>${{ record.daily_amount }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Monthly Summaries</h2>
+    <table border="1">
+        <tr>
+            <th>Month/Year</th>
+            <th>Total Hours</th>
+            <th>Total Amount</th>
+        </tr>
+        {% for summary in monthly_summaries %}
+        <tr>
+            <td>{{ summary.month }}/{{ summary.year }}</td>
+            <td>{{ summary.total_hours }}</td>
+            <td>${{ summary.total_amount }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 </body>
 </html>

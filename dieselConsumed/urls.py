@@ -8,7 +8,9 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
     path("register/", views.register, name="register"),
 
-    path('tenant/<int:tenant_id>/<int:year>/<int:month>/', views.tenant_monthly_usage, name='tenant_monthly_usage'),
+    path('tenant/<int:tenant_id>/', views.tenant_dashboard, name='tenant_dashboard'),
+    # path('tenant/<int:tenant_id>/<int:year>/<int:month>/', views.tenant_monthly_usage, name='tenant_monthly_usage'),
+    
     path('displayTenant/<int:id>', views.displayTenant, name="displayTenant"),
     path('addTenant', views.addTenant, name="addTenant"),
     path('addTenantConsumption/<int:id>', views.addTenantConsumption, name="addTenantConsumption"),
